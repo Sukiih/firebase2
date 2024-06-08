@@ -3,9 +3,43 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/registro">Registro</router-link> |
     <router-link to="/login">Iniciar sesión</router-link>
+    <div v-if= "user">
+      <p>Usuario: {{ user.email }}</p>
+      <button @click="logout">Logout</button>
+    </div>
   </nav>
-  <router-view/>
+<router-view/>
 </template>
+
+<script>
+import {auth, onAuthStateChanged, signOut} from '@/auth';
+
+export default{
+  name: 'App',
+  data() {
+    return {
+      user: null,
+  };
+  },
+  created() {
+    onAuthStateChanged(auth, (user) => {
+      this.user = user ? user : null;
+    });
+  },
+  methods: {
+    async logout() {
+      try {
+        await signOut(auth);
+        this.user = null;
+        this.$router.push('/');
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    }
+  }
+};
+
+</script>
 
 <style>
 #app {

@@ -14,12 +14,18 @@ const routes = [
   {
     path: '/registro',
     name: 'registro',
-    component: () => import(/* webpackChunkName: "about" */ '../views/RegistroView.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/RegistroView.vue'),
+    meta: {
+      public: true,
+    }
   },
   {
     path: '/login',
     name: 'login',
-    component: () => import(/* webpackChunkName: "about" */ '../views/LoginView.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/LoginView.vue'),
+    meta: {
+      public: true,
+    }
   },
 ];
 
@@ -29,12 +35,18 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.path === "/login" && auth.currentUser) {
-    next("/home"); // Redirige a la página de inicio si ya hay un usuario autenticado
-  } else if (to.matched.some((record) => record.meta.auth) && !auth.currentUser) {
-    next("/login"); // Redirige a la página de inicio de sesión si el usuario intenta acceder a una ruta protegida sin estar autenticado
-  } else {
-    next(); // Permite que la navegación continúe normalmente
+  // Si la ruta requiere autenticación y el usuario no está autenticado, redirige al usuario a la página de inicio de sesión
+  if (to.meta.auth && !auth.currentUser) {
+    next('/login');
+  } 
+  // Si el usuario está intentando acceder a la página de inicio de sesión o registro y ya está autenticado,
+  // redirige al usuario a la página de inicio
+  else if ((to.path === '/login' || to.path === '/registro') && auth.currentUser) {
+    next('/home');
+  } 
+  // En cualquier otro caso, permite que el usuario acceda a la ruta solicitada
+  else {
+    next();
   }
 });
 
